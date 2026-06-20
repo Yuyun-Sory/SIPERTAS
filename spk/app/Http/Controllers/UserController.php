@@ -12,19 +12,33 @@ class UserController extends Controller
     private function getKelasList(): array
     {
         return [
-            'VII A', 'VII B', 'VII C',
-            'VIII A', 'VIII B', 'VIII C',
-            'IX A', 'IX B', 'IX C',
+            'VII A', 'VII B',
+            'VIII A', 'VIII B',
+            'IX A', 'IX B',
         ];
     }
 
     public function index()
-    {
-        $users     = User::orderBy('role')->orderBy('name')->get();
-        $kelasList = $this->getKelasList();
+{
+    $kelasList = $this->getKelasList();
 
-        return view('admin.users', compact('users', 'kelasList'));
-    }
+    $users = User::orderBy('role')->orderBy('name')->get();
+
+    // Urutkan ulang: wali_kelas dikelompokkan sesuai urutan kelasList,
+    // role lain (admin, kepala_sekolah) tetap di awal sesuai orderBy('role')
+    $kelasOrder = array_flip($kelasList);
+
+    $users = $users->sortBy(function ($user) use ($kelasOrder) {
+        if ($user->role === 'wali_kelas') {
+            // urutan: 100+ index kelas, supaya admin/kepsek (tanpa kelas) tetap di atas
+            return 100 + ($kelasOrder[$user->kelas] ?? 999);
+        }
+        // non wali_kelas urut berdasarkan role dulu (admin di atas)
+        return $user->role === 'admin' ? 0 : 50;
+    })->values();
+
+    return view('admin.users', compact('users', 'kelasList'));
+}
 
     public function store(Request $request)
     {
