@@ -177,7 +177,7 @@
                     <label class="fl" for="nama">Nama Lengkap <span class="req">*</span></label>
                     <input type="text" id="nama" name="nama"
                            value="{{ old('nama') }}"
-                           placeholder="cth. Ahmad Fauzi"
+                           placeholder="cth. Salsabila"
                            class="fi {{ $errors->has('nama') ? 'err' : '' }}">
                     @error('nama')
                         <span class="ferr">⚠ {{ $message }}</span>

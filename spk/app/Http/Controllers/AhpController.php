@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Kriteria;
 use App\Models\Ahp;
+use App\Models\Riwayat;
 use Illuminate\Http\Request;
 
 class AhpController extends Controller
@@ -31,12 +32,6 @@ class AhpController extends Controller
 
     /**
      * Halaman AHP
-     *
-     * FIX UTAMA:
-     * 1. $ri dikirim ke view agar tidak "Undefined variable $ri"
-     * 2. $matrix dibaca dari DB (matrix_json) → ditampilkan di form → tombol BIRU & aktif
-     * 3. $hasil dihitung ulang dari matrix yang tersimpan → step bar, CR, ranking tampil benar
-     * 4. $bobotTersimpan dikirim agar view tahu bobot sudah ada (untuk warna tombol)
      */
     public function index()
     {
@@ -44,7 +39,6 @@ class AhpController extends Controller
         $n         = $kriterias->count();
         $ri        = $this->ri;
 
-        // ── Baca matrix yang tersimpan (dari record pertama yg punya matrix_json) ──
         $matrix         = [];
         $hasil          = null;
         $bobotTersimpan = false;
@@ -57,11 +51,10 @@ class AhpController extends Controller
             if (is_array($decoded) && count($decoded) === $n) {
                 $matrix         = $decoded;
                 $hasil          = $this->hitungAHP($matrix, $kriterias);
-                $bobotTersimpan = true;   // ← KUNCI: flag ini membuat tombol BIRU
+                $bobotTersimpan = true;
             }
         }
 
-        // ── Bobot per-kriteria untuk ditampilkan di tabel (opsional) ──
         $savedBobots = Ahp::all()->keyBy('kriteria_id');
 
         return view('ahp.index', compact(
@@ -71,7 +64,7 @@ class AhpController extends Controller
             'matrix',
             'hasil',
             'savedBobots',
-            'bobotTersimpan'   // ← dikirim ke view
+            'bobotTersimpan'
         ));
     }
 
@@ -95,12 +88,14 @@ class AhpController extends Controller
 
         $rawMatrix = $request->input('matrix', []);
 
-        // ── Bangun matriks simetris lengkap ──
+        // Bangun matriks simetris lengkap
         $matrix = array_fill(0, $n, array_fill(0, $n, 1.0));
 
         for ($i = 0; $i < $n; $i++) {
             for ($j = $i + 1; $j < $n; $j++) {
-                $value = $this->parseMatrixValue($rawMatrix[$i][$j] ?? '1');
+                $value = $this->parseMatrixValue(
+                    $rawMatrix[$i][$j] ?? '1'
+                );
 
                 if ($value <= 0) {
                     $value = 1.0;
@@ -113,7 +108,7 @@ class AhpController extends Controller
 
         $hasil = $this->hitungAHP($matrix, $kriterias);
 
-        // ── Tolak jika tidak konsisten ──
+        // Tolak jika tidak konsisten
         if (! $hasil['consistent']) {
             return redirect()
                 ->route('ahp.index')
@@ -125,19 +120,43 @@ class AhpController extends Controller
                 );
         }
 
-        // ── Simpan ke DB ──
+        /**
+         * =====================================================
+         * SIMPAN BOBOT TERBARU (BUKAN HISTORI)
+         * =====================================================
+         */
         Ahp::truncate();
 
         foreach ($kriterias as $index => $kriteria) {
             Ahp::create([
                 'kriteria_id' => $kriteria->id,
                 'bobot'       => $hasil['bobot'][$index],
-                // Simpan matrix_json hanya di baris pertama
                 'matrix_json' => $index === 0
                     ? json_encode($matrix)
                     : null,
             ]);
         }
+
+        /**
+         * =====================================================
+         * SIMPAN RIWAYAT AHP
+         * =====================================================
+         */
+        Riwayat::create([
+            'jenis'      => 'ahp',
+            'periode_id' => null,
+            'user_id'    => auth()->id(),
+            'judul'      => 'Perhitungan AHP - ' . now()->format('d M Y H:i'),
+            'data_json'  => [
+                'kriteria_ids' => $kriterias->pluck('id')->toArray(),
+                'matrix'       => $matrix,
+                'bobot'        => $hasil['bobot'],
+                'lambdaMax'    => $hasil['lambdaMax'],
+                'ci'           => $hasil['ci'],
+                'cr'           => $hasil['cr'],
+                'consistent'   => $hasil['consistent'],
+            ],
+        ]);
 
         return redirect()
             ->route('ahp.index')
@@ -149,13 +168,9 @@ class AhpController extends Controller
             );
     }
 
-    // ─────────────────────────────────────────────────────────────
-    //  PRIVATE HELPERS
-    // ─────────────────────────────────────────────────────────────
-
     /**
      * Parse nilai dari input form.
-     * Mendukung: "3", "1/3", "0.333", dsb.
+     * Mendukung: "3", "1/3", "0.333", dst.
      */
     private function parseMatrixValue(mixed $raw): float
     {
@@ -167,39 +182,40 @@ class AhpController extends Controller
 
         if (str_contains($raw, '/')) {
             [$num, $den] = explode('/', $raw, 2);
+
             $den = (float) $den;
-            return $den != 0 ? (float) $num / $den : 1.0;
+
+            return $den != 0
+                ? (float) $num / $den
+                : 1.0;
         }
 
         $parsed = (float) $raw;
-        return $parsed > 0 ? $parsed : 1.0;
+
+        return $parsed > 0
+            ? $parsed
+            : 1.0;
     }
 
     /**
-     * Inti Perhitungan AHP — sesuai struktur Excel:
-     *
-     * Langkah 1 : Matriks Perbandingan
-     * Langkah 2 : Jumlah Kolom
-     * Langkah 3 : Normalisasi (tiap sel / jumlah kolom)
-     * Langkah 4 : Prioritas / Bobot (rata-rata baris normalisasi)
-     * Langkah 5 : λmax  — kalikan matriks × bobot, bagi bobot, rata-ratakan
-     * Langkah 6 : CI = (λmax − n) / (n − 1)
-     * Langkah 7 : CR = CI / RI[n]
+     * Perhitungan AHP
      */
     private function hitungAHP(array $matrix, $kriterias): array
     {
         $n = count($matrix);
 
-        // ── 2. Jumlah tiap kolom (Σ Kolom) ──
+        // Jumlah kolom
         $colSum = array_fill(0, $n, 0.0);
+
         for ($j = 0; $j < $n; $j++) {
             for ($i = 0; $i < $n; $i++) {
                 $colSum[$j] += $matrix[$i][$j];
             }
         }
 
-        // ── 3. Matriks Normalisasi ──
+        // Normalisasi
         $norm = [];
+
         for ($i = 0; $i < $n; $i++) {
             for ($j = 0; $j < $n; $j++) {
                 $norm[$i][$j] = $colSum[$j] > 0
@@ -208,47 +224,55 @@ class AhpController extends Controller
             }
         }
 
-        // ── 4. Bobot Prioritas (rata-rata baris normalisasi) ──
-        $bobot    = [];
-        $rowNorm  = [];   // jumlah baris normalisasi (untuk tabel "Jumlah")
+        // Bobot prioritas
+        $bobot   = [];
+        $rowNorm = [];
+
         for ($i = 0; $i < $n; $i++) {
             $rowNorm[$i] = array_sum($norm[$i]);
             $bobot[$i]   = $rowNorm[$i] / $n;
         }
 
-        // ── 5. λmax: (A × W) / W untuk tiap baris, lalu rata-rata ──
-        //
-        //   Excel: kalikan matriks perbandingan dengan prioritas,
-        //          hasilkan "Jumlah" per baris, bagi dengan prioritas → "Hasil",
-        //          rata-ratakan semua "Hasil" → λmax
+        // λmax
         $lambdaValues = [];
-        $matTimesW    = [];   // baris hasil (A × W) — ditampilkan di tabel
+        $matTimesW    = [];
+
         for ($i = 0; $i < $n; $i++) {
             $sum = 0.0;
+
             for ($j = 0; $j < $n; $j++) {
                 $sum += $matrix[$i][$j] * $bobot[$j];
             }
-            $matTimesW[$i]    = $sum;
-            $lambdaValues[$i] = $bobot[$i] > 0 ? $sum / $bobot[$i] : 0.0;
+
+            $matTimesW[$i] = $sum;
+
+            $lambdaValues[$i] = $bobot[$i] > 0
+                ? $sum / $bobot[$i]
+                : 0.0;
         }
 
         $lambdaMax = array_sum($lambdaValues) / $n;
 
-        // ── 6. CI ──
-        $ci = $n > 1 ? ($lambdaMax - $n) / ($n - 1) : 0.0;
+        // CI
+        $ci = $n > 1
+            ? ($lambdaMax - $n) / ($n - 1)
+            : 0.0;
 
-        // ── 7. CR ──
+        // CR
         $riVal = $this->ri[$n] ?? 1.49;
-        $cr    = $riVal > 0 ? $ci / $riVal : 0.0;
+
+        $cr = $riVal > 0
+            ? $ci / $riVal
+            : 0.0;
 
         return [
             'matrix'       => $matrix,
             'colSum'       => $colSum,
             'norm'         => $norm,
-            'rowNorm'      => $rowNorm,     // jumlah per baris normalisasi
+            'rowNorm'      => $rowNorm,
             'bobot'        => $bobot,
-            'matTimesW'    => $matTimesW,   // A×W per baris
-            'lambdaValues' => $lambdaValues,// Hasil = (A×W)/W per baris
+            'matTimesW'    => $matTimesW,
+            'lambdaValues' => $lambdaValues,
             'lambdaMax'    => $lambdaMax,
             'ci'           => $ci,
             'ri'           => $riVal,

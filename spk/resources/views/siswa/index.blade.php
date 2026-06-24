@@ -752,9 +752,6 @@ function showToast(msg, type = 'info') {
 }
 
 // ─── FLASH SESSION ───────────────────────────────────────
-@if(session('success'))
-    showToast('✅ {!! addslashes(session('success')) !!}', 'success');
-@endif
 @if(session('error'))
     showToast('❌ {!! addslashes(session('error')) !!}', 'error');
 @endif

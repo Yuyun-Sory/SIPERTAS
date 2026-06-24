@@ -427,10 +427,6 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Hasil</div>
-                <a href="{{ route('smart.index') }}"
-                   class="nav-item {{ request()->routeIs('smart.*') ? 'active' : '' }}">
-                    <i class="fas fa-ranking-star"></i> Perhitungan SMART
-                </a>
                 <a href="{{ route('riwayat.index') }}"
                    class="nav-item {{ request()->routeIs('riwayat.*') ? 'active' : '' }}">
                     <i class="fas fa-clock-rotate-left"></i> Riwayat
@@ -444,10 +440,6 @@
 
             <div class="nav-section">
                 <div class="nav-section-label">Laporan</div>
-                <a href="{{ route('smart.index') }}"
-                   class="nav-item {{ request()->routeIs('smart.*') ? 'active' : '' }}">
-                    <i class="fas fa-ranking-star"></i> Hasil Ranking SMART
-                </a>
                 <a href="{{ route('riwayat.index') }}"
                    class="nav-item {{ request()->routeIs('riwayat.*') ? 'active' : '' }}">
                     <i class="fas fa-clock-rotate-left"></i> Riwayat
@@ -474,10 +466,6 @@
 {{-- ===================== NAVBAR ===================== --}}
 <header class="navbar">
     <div class="navbar-left">
-        <div>
-            <div class="navbar-title">@yield('page-title', 'Dashboard')</div>
-            <div class="navbar-subtitle">@yield('page-subtitle', 'Sistem Pendukung Keputusan Pemilihan Siswa Terbaik')</div>
-        </div>
         @yield('page-actions')
     </div>
     <div class="navbar-right">
@@ -499,11 +487,11 @@
 <main class="main-content">
 
     @if(session('success'))
-        <div class="alert alert-success">
-            <i class="fas fa-circle-check"></i>
-            {{ session('success') }}
-        </div>
-    @endif
+    <div class="alert alert-success">
+        <i class="fas fa-circle-check"></i>
+        {!! session('success') !!}
+    </div>
+@endif
 
     @if(session('error'))
         <div class="alert alert-danger">

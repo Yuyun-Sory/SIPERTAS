@@ -30,7 +30,7 @@
 .divider { border:none; border-top:1.5px solid var(--border); margin:0 0 24px; }
 
 /* ── STATS ───────────────────────────────────── */
-.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:24px; }
 .stat-card { background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r-lg); padding:18px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--sh-xs); position:relative; overflow:hidden; transition:transform .2s,box-shadow .2s; }
 .stat-card:hover { transform:translateY(-2px); box-shadow:var(--sh-sm); }
 .stat-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 var(--r-lg) var(--r-lg); }
@@ -320,9 +320,7 @@
 <hr class="divider">
 
 {{-- ════════════════ FLASH MESSAGES ════════════════ --}}
-@if(session('success'))
-    <div class="flash flash-success">✅ {!! session('success') !!}</div>
-@endif
+
 @if(session('error'))
     <div class="flash flash-error">❌ {{ session('error') }}</div>
 @endif
@@ -350,13 +348,6 @@
             <div class="stat-lbl">Perhitungan AHP</div>
         </div>
     </div>
-    <div class="stat-card sc-nilai">
-        <div class="stat-icon" style="background:var(--green-bg);">📝</div>
-        <div>
-            <div class="stat-val">{{ $totalNilai }}</div>
-            <div class="stat-lbl">Input Nilai</div>
-        </div>
-    </div>
 </div>
 
 {{-- ════════════════ FILTER BAR ════════════════ --}}
@@ -380,7 +371,6 @@
         <option value="">Semua Jenis</option>
         <option value="smart" {{ request('jenis')==='smart' ? 'selected' : '' }}>🏆 Perhitungan SMART</option>
         <option value="ahp"   {{ request('jenis')==='ahp'   ? 'selected' : '' }}>⚖️ Perhitungan AHP</option>
-        <option value="nilai" {{ request('jenis')==='nilai'  ? 'selected' : '' }}>📝 Input Nilai</option>
     </select>
 
     <select name="periode_id" class="filter-select">
@@ -479,7 +469,7 @@
             $iconCls  = 'icon-' . $jenis;
             $jbCls    = 'jb-' . $jenis;
             $icons    = ['smart'=>'🏆','ahp'=>'⚖️','nilai'=>'📝'];
-            $labels   = ['smart'=>'Perhitungan SMART','ahp'=>'Perhitungan AHP','nilai'=>'Input Nilai'];
+            $labels   = ['smart'=>'Perhitungan SMART','ahp'=>'Perhitungan AHP','nilai'];
         @endphp
         <div class="riwayat-card">
             <div class="rc-inner">

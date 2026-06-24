@@ -199,13 +199,6 @@ tbody tr.row-selected { background:#eff6ff !important; }
             Skor akhir = Σ (bobot × utility). Siswa dengan skor tertinggi adalah yang terbaik.
         </p>
     </div>
-
-    {{-- Tombol Cetak — hanya muncul jika sudah dihitung --}}
-    @if(($sudahDihitung ?? false) && ($tabelSkor ?? collect())->isNotEmpty())
-        <button class="btn-hitung no-print" onclick="window.print()" style="background:var(--ink-2);">
-            🖨️ Cetak Hasil
-        </button>
-    @endif
 </div>
 <hr class="divider">
 
