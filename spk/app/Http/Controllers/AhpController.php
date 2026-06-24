@@ -139,22 +139,39 @@ class AhpController extends Controller
 
         /**
          * =====================================================
-         * SIMPAN RIWAYAT AHP
+         * SIMPAN RIWAYAT AHP — data LENGKAP untuk laporan
+         * (kode/nama/tipe kriteria + seluruh langkah hitungan)
          * =====================================================
          */
+        $kriteriaInfo = $kriterias->map(function ($k) {
+            return [
+                'id'   => $k->id,
+                'kode' => $k->kode,
+                'nama' => $k->nama,
+                'tipe' => $k->tipe,
+            ];
+        })->values()->toArray();
+
         Riwayat::create([
             'jenis'      => 'ahp',
             'periode_id' => null,
             'user_id'    => auth()->id(),
             'judul'      => 'Perhitungan AHP - ' . now()->format('d M Y H:i'),
             'data_json'  => [
-                'kriteria_ids' => $kriterias->pluck('id')->toArray(),
+                'kriteria'     => $kriteriaInfo,
                 'matrix'       => $matrix,
+                'colSum'       => $hasil['colSum'],
+                'norm'         => $hasil['norm'],
+                'rowNorm'      => $hasil['rowNorm'],
                 'bobot'        => $hasil['bobot'],
+                'matTimesW'    => $hasil['matTimesW'],
+                'lambdaValues' => $hasil['lambdaValues'],
                 'lambdaMax'    => $hasil['lambdaMax'],
                 'ci'           => $hasil['ci'],
+                'ri'           => $hasil['ri'],
                 'cr'           => $hasil['cr'],
                 'consistent'   => $hasil['consistent'],
+                'n'            => $hasil['n'],
             ],
         ]);
 

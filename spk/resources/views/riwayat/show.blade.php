@@ -375,14 +375,8 @@ tbody td.left { text-align: left; }
 
 /* ═══════════════════════════════════════════
    ██████████████  PRINT STYLES  ██████████████
-   Prinsip:
-   1. Sembunyikan semua elemen navigasi/UI
-   2. Tampilkan HANYA konten bertanda .print-show
-   3. Gunakan @page + page-break untuk layout A4
-   4. Force warna agar tinta tercetak
 ═══════════════════════════════════════════ */
 @media print {
-    /* ---------- PAGE SETUP ---------- */
     @page {
         size: A4 portrait;
         margin: 1.5cm 1.8cm 2cm 1.8cm;
@@ -391,7 +385,6 @@ tbody td.left { text-align: left; }
         margin-top: 1cm;
     }
 
-    /* ---------- BASE RESET ---------- */
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -407,7 +400,6 @@ tbody td.left { text-align: left; }
         padding: 0 !important;
     }
 
-    /* ---------- SEMBUNYIKAN ELEMEN UI ---------- */
     .no-print,
     .btn-back,
     .btn-print,
@@ -419,13 +411,11 @@ tbody td.left { text-align: left; }
         display: none !important;
     }
 
-    /* ---------- TAMPILKAN KOP SURAT ---------- */
     .print-header {
         display: block !important;
         margin-bottom: 0;
     }
 
-    /* ---------- META CARD CETAK ---------- */
     .meta-card {
         box-shadow: none !important;
         border: 1pt solid #cbd5e1 !important;
@@ -445,7 +435,6 @@ tbody td.left { text-align: left; }
     .meta-item-label { font-size: 8pt !important; }
     .meta-item-val   { font-size: 10pt !important; }
 
-    /* ---------- SECTION CARD CETAK ---------- */
     .section-card.print-show {
         display: block !important;
         box-shadow: none !important;
@@ -468,7 +457,6 @@ tbody td.left { text-align: left; }
         font-size: 8pt !important;
     }
 
-    /* ---------- TABLE CETAK ---------- */
     table { width: 100% !important; border-collapse: collapse !important; font-size: 9pt !important; }
     thead tr { background: #f1f5f9 !important; }
     thead th {
@@ -498,7 +486,6 @@ tbody td.left { text-align: left; }
     }
     tbody td.left { text-align: left !important; }
 
-    /* ---------- BADGES CETAK ---------- */
     .rank-cell {
         display: inline-flex !important;
         width: 22px !important;
@@ -531,7 +518,6 @@ tbody td.left { text-align: left; }
     .tipe-benefit { background: #d1fae5 !important; color: #065f46 !important; font-size: 8pt !important; }
     .tipe-cost    { background: #fee2e2 !important; color: #991b1b !important; font-size: 8pt !important; }
 
-    /* ---------- PODIUM CETAK ---------- */
     .podium-mini {
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
@@ -551,7 +537,6 @@ tbody td.left { text-align: left; }
     .pm-kelas { font-size: 8pt !important; }
     .pm-skor  { font-size: 14pt !important; }
 
-    /* ---------- SUMMARY BAR CETAK ---------- */
     .summary-bar {
         background: #f8fafc !important;
         border-top: 1pt solid #cbd5e1 !important;
@@ -560,22 +545,18 @@ tbody td.left { text-align: left; }
         gap: 14pt !important;
     }
 
-    /* ---------- AHP CR BOX ---------- */
     .cr-box {
         background: #f8fafc !important;
         border-top: 1pt solid #cbd5e1 !important;
     }
 
-    /* ---------- ANTI POTONG ---------- */
     .print-show { page-break-inside: avoid; }
     .podium-mini-card { page-break-inside: avoid; }
     tr { page-break-inside: avoid !important; }
 
-    /* Tabel panjang boleh multi-halaman, tapi header diulang */
     thead { display: table-header-group; }
     tfoot { display: table-footer-group; }
 
-    /* Pastikan tidak ada overflow horizontal */
     .section-body { overflow: visible !important; }
 }
 </style>
@@ -601,8 +582,6 @@ tbody td.left { text-align: left; }
      KOP SURAT CETAK — hanya muncul saat @media print
 ═══════════════════════════════════════════════════════════ --}}
 <div class="print-header">
-
-    {{-- Garis atas --}}
     <table style="width:100%;border-collapse:collapse;border-bottom:2.5pt solid #0a0f1e;padding-bottom:10pt;margin-bottom:10pt;">
         <tr>
             <td style="vertical-align:top;padding:0 0 8pt 0;">
@@ -628,14 +607,12 @@ tbody td.left { text-align: left; }
         </tr>
     </table>
 
-    {{-- Judul dokumen --}}
     <div style="background:#0a0f1e;color:#fff;padding:8pt 12pt;border-radius:4pt;margin-bottom:10pt;font-size:11pt;font-weight:800;">
         {{ $riwayat->judul }}
         @if($riwayat->keterangan)
         <span style="font-weight:400;font-size:9pt;opacity:.75;margin-left:8pt;">— {{ $riwayat->keterangan }}</span>
         @endif
     </div>
-
 </div>
 
 {{-- ═══════════════════════════════════════════════════════════
@@ -699,7 +676,6 @@ tbody td.left { text-align: left; }
 ═══════════════════════════════════════════════════════════ --}}
 @if($jenis === 'smart')
 
-    {{-- ── PODIUM ── (cetak + layar) --}}
     @if($tabelSkor->count() >= 1)
     <div class="section-card print-show">
         <div class="section-head">
@@ -734,7 +710,6 @@ tbody td.left { text-align: left; }
     </div>
     @endif
 
-    {{-- ── STEP 1: BOBOT KRITERIA (AHP) ── (layar saja) --}}
     @if($kriterias->isNotEmpty())
     <div class="section-card no-print">
         <div class="section-head">
@@ -767,7 +742,6 @@ tbody td.left { text-align: left; }
     </div>
     @endif
 
-    {{-- ── STEP 2: NILAI AWAL SISWA ── (layar saja) --}}
     @if($tabelNilai->isNotEmpty())
     <div class="section-card no-print">
         <div class="section-head">
@@ -813,7 +787,6 @@ tbody td.left { text-align: left; }
     </div>
     @endif
 
-    {{-- ── STEP 3: NORMALISASI UTILITY ── (layar saja) --}}
     @if($tabelNorm->isNotEmpty())
     <div class="section-card no-print">
         <div class="section-head">
@@ -854,7 +827,6 @@ tbody td.left { text-align: left; }
     </div>
     @endif
 
-    {{-- ── STEP 4: SKOR AKHIR SMART ── (cetak + layar) --}}
     @if($tabelSkor->isNotEmpty())
     <div class="section-card print-show">
         <div class="section-head">
@@ -913,7 +885,6 @@ tbody td.left { text-align: left; }
     </div>
     @endif
 
-    {{-- ── DETAIL BOBOT KRITERIA (untuk cetak) ── --}}
     @if($kriterias->isNotEmpty())
     <div class="section-card print-show">
         <div class="section-head">
@@ -957,7 +928,6 @@ tbody td.left { text-align: left; }
     </div>
     @endif
 
-    {{-- ── CATATAN / FOOTER CETAK ── --}}
     <div class="section-card print-show" style="margin-bottom:0;">
         <div class="section-head">
             <div class="section-title">📌 Catatan &amp; Validasi</div>
@@ -980,16 +950,124 @@ tbody td.left { text-align: left; }
 
 
 {{-- ═══════════════════════════════════════════════════════════
-     ████████   KONTEN AHP   ████████
+     ████████   KONTEN AHP — VERSI LENGKAP & TERSTRUKTUR   ████████
 ═══════════════════════════════════════════════════════════ --}}
 @elseif($jenis === 'ahp')
 
+    @php
+        $kriteriaAhp   = collect($data['kriteria'] ?? []);
+        $matrixAhp     = $data['matrix']       ?? [];
+        $colSumAhp     = $data['colSum']       ?? [];
+        $normAhp       = $data['norm']         ?? [];
+        $rowNormAhp    = $data['rowNorm']      ?? [];
+        $bobotAhp      = $data['bobot']        ?? [];
+        $matTimesWAhp  = $data['matTimesW']    ?? [];
+        $lambdaValsAhp = $data['lambdaValues'] ?? [];
+        $nAhp          = $data['n'] ?? $kriteriaAhp->count();
+        $totalBobotAhp = array_sum($bobotAhp);
+        $crOk          = ($data['cr'] ?? 1) <= 0.1;
+    @endphp
+
+    {{-- RINGKASAN --}}
     <div class="section-card print-show">
         <div class="section-head">
-            <div class="section-title">⚖️ Hasil Pembobotan AHP (Analytical Hierarchy Process)</div>
+            <div class="section-title">⚖️ Ringkasan Hasil Pembobotan AHP</div>
+        </div>
+        <div class="summary-bar cr-box">
+            <span>Jumlah Kriteria: <strong>{{ $nAhp }}</strong></span>
+            <span>λ<sub>max</sub>: <strong style="font-family:var(--mono);">{{ number_format($data['lambdaMax'] ?? 0, 4) }}</strong></span>
+            <span>CI: <strong style="font-family:var(--mono);">{{ number_format($data['ci'] ?? 0, 4) }}</strong></span>
+            <span>RI: <strong style="font-family:var(--mono);">{{ number_format($data['ri'] ?? 0, 2) }}</strong></span>
+            <span>CR: <strong style="font-family:var(--mono);color:{{ $crOk ? 'var(--green)' : 'var(--red)' }};">{{ number_format($data['cr'] ?? 0, 4) }}</strong></span>
+            <span>Status:
+                <strong style="color:{{ $crOk ? 'var(--green)' : 'var(--red)' }};">
+                    {{ $crOk ? '✓ Konsisten (CR ≤ 0.10)' : '✗ Tidak Konsisten (CR > 0.10)' }}
+                </strong>
+            </span>
+        </div>
+    </div>
+
+    {{-- STEP 1: MATRIKS PERBANDINGAN BERPASANGAN --}}
+    @if($kriteriaAhp->isNotEmpty() && !empty($matrixAhp))
+    <div class="section-card print-show">
+        <div class="section-head">
+            <div class="section-title"><span class="step-badge">1</span> Matriks Perbandingan Berpasangan (Pairwise Comparison)</div>
         </div>
         <div class="section-body">
-            @if(!empty($data['bobot_list']))
+            <table>
+                <thead>
+                    <tr>
+                        <th class="left">Kriteria</th>
+                        @foreach($kriteriaAhp as $k)
+                        <th title="{{ $k['nama'] }}">{{ $k['kode'] }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($matrixAhp as $i => $row)
+                    <tr>
+                        <td class="left"><strong style="font-family:var(--mono);">{{ $kriteriaAhp[$i]['kode'] ?? ('K'.($i+1)) }}</strong></td>
+                        @foreach($row as $val)
+                        <td><span class="val-mono">{{ number_format($val, 3) }}</span></td>
+                        @endforeach
+                    </tr>
+                    @endforeach
+                </tbody>
+                @if(!empty($colSumAhp))
+                <tfoot>
+                    <tr style="background:var(--surface-3);font-weight:800;">
+                        <td class="left" style="padding:8px 14px;">Σ Jumlah Kolom</td>
+                        @foreach($colSumAhp as $cs)
+                        <td><span class="val-mono">{{ number_format($cs, 3) }}</span></td>
+                        @endforeach
+                    </tr>
+                </tfoot>
+                @endif
+            </table>
+        </div>
+    </div>
+    @endif
+
+    {{-- STEP 2: NORMALISASI MATRIKS --}}
+    @if(!empty($normAhp))
+    <div class="section-card print-show">
+        <div class="section-head">
+            <div class="section-title"><span class="step-badge">2</span> Matriks Normalisasi (Nilai Sel ÷ Jumlah Kolom)</div>
+        </div>
+        <div class="section-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="left">Kriteria</th>
+                        @foreach($kriteriaAhp as $k)
+                        <th>{{ $k['kode'] }}</th>
+                        @endforeach
+                        <th>Jumlah Baris</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($normAhp as $i => $row)
+                    <tr>
+                        <td class="left"><strong style="font-family:var(--mono);">{{ $kriteriaAhp[$i]['kode'] ?? ('K'.($i+1)) }}</strong></td>
+                        @foreach($row as $val)
+                        <td><span class="val-mono">{{ number_format($val, 4) }}</span></td>
+                        @endforeach
+                        <td><span class="val-mono" style="font-weight:700;">{{ number_format($rowNormAhp[$i] ?? 0, 4) }}</span></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    {{-- STEP 3: BOBOT PRIORITAS --}}
+    @if($kriteriaAhp->isNotEmpty())
+    <div class="section-card print-show">
+        <div class="section-head">
+            <div class="section-title"><span class="step-badge">3</span> Bobot Prioritas Kriteria (Jumlah Baris Normalisasi ÷ n)</div>
+        </div>
+        <div class="section-body">
             <table>
                 <thead>
                     <tr>
@@ -1002,84 +1080,85 @@ tbody td.left { text-align: left; }
                     </tr>
                 </thead>
                 <tbody>
-                    @php $totalB = array_sum(array_column($data['bobot_list'], 'bobot')); @endphp
-                    @foreach($data['bobot_list'] as $i => $item)
+                    @foreach($kriteriaAhp as $i => $k)
+                    @php $b = $bobotAhp[$i] ?? 0; @endphp
                     <tr>
                         <td>{{ $i+1 }}</td>
-                        <td class="left"><strong style="font-family:var(--mono);">{{ $item['kode'] }}</strong></td>
-                        <td class="left">{{ $item['nama'] }}</td>
-                        <td><span class="tipe-{{ $item['tipe'] }}">{{ $item['tipe'] === 'benefit' ? '↑ Benefit' : '↓ Cost' }}</span></td>
-                        <td><span class="bobot-val">{{ number_format($item['bobot'], 4) }}</span></td>
-                        <td><span style="font-family:var(--mono);font-weight:700;">{{ $totalB > 0 ? number_format(($item['bobot']/$totalB)*100, 1).'%' : '—' }}</span></td>
+                        <td class="left"><strong style="font-family:var(--mono);">{{ $k['kode'] }}</strong></td>
+                        <td class="left">{{ $k['nama'] }}</td>
+                        <td><span class="tipe-{{ $k['tipe'] }}">{{ $k['tipe'] === 'benefit' ? '↑ Benefit' : '↓ Cost' }}</span></td>
+                        <td><span class="bobot-val">{{ number_format($b, 4) }}</span></td>
+                        <td><span style="font-family:var(--mono);font-size:12px;font-weight:700;">{{ $totalBobotAhp > 0 ? number_format(($b/$totalBobotAhp)*100, 1).'%' : '—' }}</span></td>
                     </tr>
                     @endforeach
                 </tbody>
                 <tfoot>
-                    <tr style="background:var(--surface-3);">
-                        <td colspan="4" class="left" style="padding:8px 14px;font-weight:800;">TOTAL</td>
-                        <td><span class="bobot-val">{{ number_format($totalB, 4) }}</span></td>
-                        <td><span style="font-family:var(--mono);font-weight:800;color:var(--green);">100.0%</span></td>
+                    <tr style="background:var(--surface-3);font-weight:800;">
+                        <td colspan="4" class="left" style="padding:8px 14px;"><strong>TOTAL</strong></td>
+                        <td><span class="bobot-val">{{ number_format($totalBobotAhp, 4) }}</span></td>
+                        <td><span style="font-family:var(--mono);font-size:12px;font-weight:800;color:var(--green);">100.0%</span></td>
                     </tr>
                 </tfoot>
             </table>
-            @else
-            <div style="padding:30px;text-align:center;color:var(--ink-3);">Data detail AHP tidak tersedia.</div>
-            @endif
         </div>
-
-        @if(isset($data['cr']))
-        <div class="summary-bar cr-box">
-            @php $crOk = ($data['cr'] <= 0.1); @endphp
-            <span>Consistency Ratio (CR):
-                <strong style="font-family:var(--mono);color:{{ $crOk ? 'var(--green)' : 'var(--red)' }};">
-                    {{ number_format($data['cr'], 4) }}
-                </strong>
-            </span>
-            <span>Status:
-                <strong style="color:{{ $crOk ? 'var(--green)' : 'var(--red)' }};">
-                    {{ $crOk ? '✓ Konsisten (CR ≤ 0.10)' : '✗ Tidak Konsisten (CR > 0.10)' }}
-                </strong>
-            </span>
-            @if(isset($data['lambda_max']))
-            <span>λ<sub>max</sub>: <strong style="font-family:var(--mono);">{{ number_format($data['lambda_max'], 4) }}</strong></span>
-            @endif
-            @if(isset($data['ci']))
-            <span>CI: <strong style="font-family:var(--mono);">{{ number_format($data['ci'], 4) }}</strong></span>
-            @endif
-        </div>
-        @endif
     </div>
+    @endif
 
-    {{-- Matriks Perbandingan AHP (jika tersedia) --}}
-    @if(!empty($data['matriks']))
+    {{-- STEP 4: UJI KONSISTENSI --}}
+    @if(!empty($matTimesWAhp))
     <div class="section-card print-show">
         <div class="section-head">
-            <div class="section-title">📊 Matriks Perbandingan Berpasangan (Pairwise Comparison)</div>
+            <div class="section-title"><span class="step-badge">4</span> Uji Konsistensi (λmax, CI, CR)</div>
         </div>
         <div class="section-body">
             <table>
                 <thead>
                     <tr>
                         <th class="left">Kriteria</th>
-                        @foreach($data['bobot_list'] ?? [] as $item)
-                        <th>{{ $item['kode'] }}</th>
-                        @endforeach
+                        <th>Bobot (W)</th>
+                        <th>A × W</th>
+                        <th>Hasil = (A×W) / W</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($data['matriks'] as $rowKey => $rowVals)
+                    @foreach($kriteriaAhp as $i => $k)
                     <tr>
-                        <td class="left"><strong style="font-family:var(--mono);">{{ $rowKey }}</strong></td>
-                        @foreach($rowVals as $val)
-                        <td><span class="val-mono">{{ is_float($val) ? number_format($val, 3) : $val }}</span></td>
-                        @endforeach
+                        <td class="left"><strong style="font-family:var(--mono);">{{ $k['kode'] }}</strong></td>
+                        <td><span class="val-mono">{{ number_format($bobotAhp[$i] ?? 0, 4) }}</span></td>
+                        <td><span class="val-mono">{{ number_format($matTimesWAhp[$i] ?? 0, 4) }}</span></td>
+                        <td><span class="val-mono" style="font-weight:700;">{{ number_format($lambdaValsAhp[$i] ?? 0, 4) }}</span></td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+        <div class="summary-bar cr-box">
+            <span>λ<sub>max</sub> (rata-rata Hasil): <strong style="font-family:var(--mono);">{{ number_format($data['lambdaMax'] ?? 0, 4) }}</strong></span>
+            <span>CI = (λmax − n) / (n − 1): <strong style="font-family:var(--mono);">{{ number_format($data['ci'] ?? 0, 4) }}</strong></span>
+            <span>RI (n={{ $nAhp }}): <strong style="font-family:var(--mono);">{{ number_format($data['ri'] ?? 0, 2) }}</strong></span>
+            <span>CR = CI / RI: <strong style="font-family:var(--mono);color:{{ $crOk ? 'var(--green)' : 'var(--red)' }};">{{ number_format($data['cr'] ?? 0, 4) }}</strong></span>
+        </div>
     </div>
     @endif
+
+    {{-- CATATAN / FOOTER CETAK --}}
+    <div class="section-card print-show" style="margin-bottom:0;">
+        <div class="section-head">
+            <div class="section-title">📌 Catatan &amp; Validasi</div>
+        </div>
+        <div style="padding:14px 20px;font-size:12px;color:var(--ink-2);line-height:1.8;">
+            <p>1. Laporan ini dihasilkan secara otomatis oleh Sistem Pendukung Keputusan Pemilihan Siswa Terbaik.</p>
+            <p>2. Metode <strong>Analytical Hierarchy Process (AHP)</strong> digunakan untuk menentukan bobot prioritas setiap kriteria berdasarkan perbandingan berpasangan (pairwise comparison) oleh pengambil keputusan.</p>
+            <p>3. Bobot prioritas dihitung dari rata-rata baris matriks normalisasi: <em>wi = (Σ aij ÷ Σ kolom j) ÷ n</em>.</p>
+            <p>4. Konsistensi penilaian diuji menggunakan Consistency Ratio: <em>CR = CI ÷ RI</em>, dimana <em>CI = (λmax − n) ÷ (n − 1)</em>.</p>
+            <p>5. Consistency Ratio (CR): <strong style="font-family:var(--mono);">{{ number_format($data['cr'] ?? 0, 4) }}</strong>
+            — {{ $crOk ? '✓ Konsisten (CR ≤ 0.10, bobot dapat diterima dan digunakan untuk perhitungan SMART)' : '⚠ Tidak Konsisten (CR > 0.10, perbandingan kriteria perlu ditinjau ulang)' }}</p>
+        </div>
+        <div style="padding:12px 20px;border-top:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ink-3);">
+            <span>Sistem Pendukung Keputusan · {{ optional($riwayat->periode)->nama_periode ?? '' }}</span>
+            <span id="ttd-tanggal">Dicetak: —</span>
+        </div>
+    </div>
 
 
 {{-- ═══════════════════════════════════════════════════════════
@@ -1142,7 +1221,6 @@ tbody td.left { text-align: left; }
 
 @push('scripts')
 <script>
-/* Isi tanggal cetak secara dinamis */
 document.addEventListener('DOMContentLoaded', function () {
     const now    = new Date();
     const opts   = { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' };
